@@ -1,13 +1,25 @@
-from mainwindow import *
-import sys
+try:
+    import ctypes, os
+    if ctypes.windll.shell32.IsUserAnAdmin():
+        os.system("pip install -r requirements.txt")
 
-if __name__ == '__main__':
-    OnStart()
+        from mainwindow import *
+        import sys
 
-    app = QtWidgets.QApplication(sys.argv)
-    app.setWindowIcon(QtGui.QIcon('icon.png'))
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+        app = QtWidgets.QApplication(sys.argv)
+        app.setWindowIcon(QtGui.QIcon('icon.png'))
+
+        MainWindow = QtWidgets.QMainWindow()
+        MainWindow.setWindowIcon(QtGui.QIcon('icon.png'))
+
+        ui = Ui_MainWindow()
+        ui.setupUi(MainWindow)
+
+        MainWindow.show()
+        sys.exit(app.exec_())
+    else:
+        import py_win_keyboard_layout, sys
+        py_win_keyboard_layout.change_foreground_window_keyboard_layout(0x04090409)
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
+except Exception as ex:
+    input(f"{ex}")
