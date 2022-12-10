@@ -88,7 +88,7 @@ class Ui_MainWindow(object):
         CreateAccounts()
         self.itemsToLaunch.clear()
         self.accountsList.clear()
-        self.steamAccounts = [] #!
+        self.steamAccounts = []
         info = readJson('accounts.json')
         info2 = readJson('launched_accounts.json')
 

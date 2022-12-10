@@ -6,6 +6,7 @@ try:
         from mainwindow import *
         import sys
 
+        OnStart()
         app = QtWidgets.QApplication(sys.argv)
         app.setWindowIcon(QtGui.QIcon('icon.png'))
 

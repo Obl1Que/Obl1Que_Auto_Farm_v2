@@ -103,9 +103,12 @@ class SteamAccount():
 def GetSharedSecret(login):
     dir_name = "./maFiles"
     for item in os.listdir(dir_name):
-        info = readJson(f'{dir_name}/{item}')
-        if info['account_name'].lower() == login.lower():
-            return info['shared_secret']
+        try:
+            info = readJson(f'{dir_name}/{item}')
+            if info['account_name'].lower() == login.lower():
+                return info['shared_secret']
+        except:
+            return None
 
 def ParceLogPass():
     accounts = {}
