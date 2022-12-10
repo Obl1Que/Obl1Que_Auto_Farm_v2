@@ -85,6 +85,7 @@ class Ui_MainWindow(object):
     def checkAccountsF(self):
         self.checkAccountsButton.clicked.connect(lambda: self.checkAccounts())
     def checkAccounts(self):
+        OnStart()
         CreateAccounts()
         self.itemsToLaunch.clear()
         self.accountsList.clear()
