@@ -1,20 +1,29 @@
 import os
 import json
 import signal
+import time
 import autoit
 from steampy.guard import generate_one_time_code
 
 class SteamAccount():
-    def __init__(self, login, password, shared_secret):
+    def __init__(self, login, password, shared_secret, win_csgo_PID = None, status = None, posX = None, posY = None):
         self.login = login
         self.password = password
         self.shared_secret = shared_secret
         self.win_csgo_title = f'[{self.login}] # Counter-Strike: Global Offensive - Direct3D 9'
-        self.win_csgo_PID = 0
-        self.win_csgo_pos = ()
-        self.status = 'Off'
-        self.posX = 0
-        self.posY = 0
+        if win_csgo_PID is not None and \
+                status is not None and \
+                posX is not None and \
+                posY is not None:
+            self.win_csgo_PID = win_csgo_PID
+            self.status = status
+            self.posX = posX
+            self.posY = posY
+        else:
+            self.win_csgo_PID = 0
+            self.status = 'Off'
+            self.posX = 0
+            self.posY = 0
     def GuardGen(self):
         return generate_one_time_code(self.shared_secret)
     def CSGOLaunch(self):
@@ -47,7 +56,6 @@ class SteamAccount():
 
         self.MoveWindow(0, 0)
         self.win_csgo_PID = autoit.win_get_process(self.win_csgo_title)
-        self.win_csgo_pos = autoit.win_get_pos(self.win_csgo_title)
         self.status = 'Launched'
         self.UpdateAccountsJSON()
     def MoveWindow(self, posX, posY):
@@ -78,8 +86,6 @@ class SteamAccount():
         self.win_csgo_PID = 0
         self.status = 'Off'
         self.UpdateAccountsJSON()
-    def GetInfoTest(self):
-        print(f'{self.login}\n{self.password}\n{self.shared_secret}\n{self.win_csgo_PID}\n{self.win_csgo_pos}\n{self.status}')
     def ConnectToServer(self, ip, password = None):
         autoit.win_activate(self.win_csgo_title)
         autoit.win_wait_active(self.win_csgo_title)

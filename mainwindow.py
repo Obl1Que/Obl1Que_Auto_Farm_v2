@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QDesktopWidget
 from functions import *
 
 class Ui_MainWindow(object):
@@ -27,34 +28,53 @@ class Ui_MainWindow(object):
                                          "    background-color: qlineargradient(spread:reflect, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(178, 99, 252, 100), stop:0.5 rgba(251, 162, 213, 100), stop:1 rgba(182, 242, 221, 100));\n"
                                          "    border-radius: 8px}")
         self.centralwidget.setObjectName("centralwidget")
+
         self.settingsButton = QtWidgets.QPushButton(self.centralwidget)
-        self.settingsButton.setGeometry(QtCore.QRect(20, 260, 401, 41))
+        self.settingsButton.setGeometry(QtCore.QRect(20, 260, 141, 41))
         self.settingsButton.setStyleSheet("")
         self.settingsButton.setObjectName("settingsButton")
+
+        self.serversButton = QtWidgets.QPushButton(self.centralwidget)
+        self.serversButton.setGeometry(QtCore.QRect(180, 260, 141, 41))
+        self.serversButton.setStyleSheet("")
+        self.serversButton.setObjectName("serversButton")
+
+        self.windowsButton = QtWidgets.QPushButton(self.centralwidget)
+        self.windowsButton.setGeometry(QtCore.QRect(340, 260, 81, 41))
+        self.windowsButton.setStyleSheet("")
+        self.windowsButton.setObjectName("windowsButton")
+        self.windowsButton.setIcon(QtGui.QIcon('img/win_icon.png'))
+        self.windowsButton.setIconSize(QtCore.QSize(20, 20))
+
         self.checkAccountsButton = QtWidgets.QPushButton(self.centralwidget)
         self.checkAccountsButton.setGeometry(QtCore.QRect(20, 20, 401, 41))
         self.checkAccountsButton.setStyleSheet("")
         self.checkAccountsButton.setObjectName("checkAccountsButton")
+
         self.addAccountsButton = QtWidgets.QPushButton(self.centralwidget)
         self.addAccountsButton.setGeometry(QtCore.QRect(20, 80, 401, 41))
         self.addAccountsButton.setStyleSheet("")
         self.addAccountsButton.setObjectName("addAccountsButton")
+
         self.addMaFilesButton = QtWidgets.QPushButton(self.centralwidget)
         self.addMaFilesButton.setGeometry(QtCore.QRect(20, 140, 401, 41))
         self.addMaFilesButton.setStyleSheet("")
         self.addMaFilesButton.setObjectName("addMaFilesButton")
+
         self.startFarmButton = QtWidgets.QPushButton(self.centralwidget)
         self.startFarmButton.setGeometry(QtCore.QRect(20, 200, 401, 41))
         self.startFarmButton.setStyleSheet("")
         self.startFarmButton.setObjectName("startFarm")
+
         self.accountsList = QtWidgets.QListWidget(self.centralwidget)
         self.accountsList.setGeometry(QtCore.QRect(445, 21, 331, 281))
         self.accountsList.setObjectName("accountsList")
-        self.logList = QtWidgets.QListWidget(self.centralwidget)
-        self.logList.setGeometry(QtCore.QRect(25, 330, 751, 251))
-        self.logList.setObjectName("logList")
-        MainWindow.setCentralWidget(self.centralwidget)
 
+        self.logList = QtWidgets.QListWidget(self.centralwidget)
+        self.logList.setGeometry(QtCore.QRect(25, 320, 751, 261))
+        self.logList.setObjectName("logList")
+
+        MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -63,11 +83,14 @@ class Ui_MainWindow(object):
         self.checkAccountsF()
         self.chooseItems()
         self.startFarmF()
+        self.ReWindowF()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Obl1Que\'s Panel CS:GO"))
         self.settingsButton.setText(_translate("MainWindow", "НАСТРОЙКИ"))
+        self.serversButton.setText(_translate("MainWindow", "СЕРВЕРА"))
+        self.windowsButton.setText(_translate("MainWindow", ""))
         self.checkAccountsButton.setText(_translate("MainWindow", "ПРОВЕРКА АККАУНТОВ"))
         self.addAccountsButton.setText(_translate("MainWindow", "ДОБАВИТЬ АККАУНТЫ"))
         self.addMaFilesButton.setText(_translate("MainWindow", "ДОБАВИТЬ MAFILE"))
@@ -89,7 +112,7 @@ class Ui_MainWindow(object):
         CreateAccounts()
         self.itemsToLaunch.clear()
         self.accountsList.clear()
-        self.steamAccounts = []
+
         info = readJson('accounts.json')
         info2 = readJson('launched_accounts.json')
 
@@ -132,6 +155,35 @@ class Ui_MainWindow(object):
             OnStart()
 
         self.accountsList.clearSelection()
+    def ReWindowF(self):
+        self.windowsButton.clicked.connect(lambda: self.ReWindow())
+    def ReWindow(self):
+        self.steamAccounts = []
+        info = readJson('launched_accounts.json')
+        for i in info:
+            self.steamAccounts.append(SteamAccount(login=info[i]["login"],
+                                                 password=info[i]["password"],
+                                                 shared_secret=info[i]["shared_secret"],
+                                                 win_csgo_PID=info[i]["win_csgo_PID"],
+                                                 status=info[i]["status"],
+                                                 posX=info[i]["posX"],
+                                                 posY=info[i]["posY"]))
+        try:
+            win_size = QDesktopWidget().availableGeometry()
+            row = 0
+            column = 0
+
+            for i in self.steamAccounts:
+                posX = 236 * row
+                posY = 120 * column
+
+                i.MoveWindow(posX, posY)
+                row += 1
+                if win_size.width() - 100 < 236 * row:
+                    row = 0
+                    column += 1
+        except Exception as ex:
+            print(ex)
     def LogWrite(self, sentense):
         self.logList.addItem(sentense)
         self.logList.scrollToBottom()
