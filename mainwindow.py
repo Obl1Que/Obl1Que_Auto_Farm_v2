@@ -117,11 +117,11 @@ class Ui_MainWindow(object):
         info2 = readJson('launched_accounts.json')
 
         for account in info:
-            self.accountsList.addItem(account)
+            self.accountsList.addItem(account.lower())
 
         for accountInfo in info:
             for accountView in range(self.accountsList.count()):
-                if info[accountInfo]["shared_secret"] is None and accountInfo == self.accountsList.item(accountView).text():
+                if info[accountInfo]["shared_secret"] is None and accountInfo.lower() == self.accountsList.item(accountView).text():
                     self.accountsList.item(accountView).setBackground(QtGui.QColor(255, 166, 166, 255))
 
         for accountInfo in info2:
@@ -148,7 +148,7 @@ class Ui_MainWindow(object):
         elif clItem.background().color().getRgb() == (166, 255, 167, 255):
             info = readJson('launched_accounts.json')
             for pid in info:
-                if pid == clItem.text():
+                if pid.lower() == clItem.text().lower():
                     os.kill(info[pid]["win_csgo_PID"], signal.SIGTERM)
                     self.LogWrite(f'- {info[pid]["login"]} был выключен.')
             clItem.setBackground(QtGui.QColor(0, 0, 0, 0))

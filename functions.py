@@ -102,7 +102,7 @@ def GetSharedSecret(login):
     for item in os.listdir(dir_name):
         try:
             info = readJson(f'{dir_name}/{item}')
-            if info['account_name'].lower() == login.lower():
+            if info['account_name'].lower() == login:
                 return info['shared_secret']
         except:
             return None
@@ -114,8 +114,8 @@ def ParceLogPass():
     for account in file:
         if account != '\n':
             account_pair = account.split(':')
-            accounts[account_pair[0]] = {'login': account_pair[0].lower(),
-                                         'password': account_pair[1].replace('\n', '')}
+            accounts[account_pair[0].lower()] = {'login': account_pair[0].lower(),
+                                                 'password': account_pair[1].replace('\n', '')}
     file.close()
     return accounts
 
