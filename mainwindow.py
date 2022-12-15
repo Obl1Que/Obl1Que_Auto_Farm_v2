@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDesktopWidget
 from functions import *
+from settingswindow import Ui_SettingsWindow
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -12,6 +13,8 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet("QMainWindow {"
                                  "background-color: white;"
                                  "}")
+        self.MainWindow = MainWindow
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setStyleSheet(".QPushButton {"
                                          "border: 0 solid;"
@@ -84,6 +87,15 @@ class Ui_MainWindow(object):
         self.chooseItems()
         self.startFarmF()
         self.ReWindowF()
+        self.goSettingsF()
+
+    def goSettingsF(self):
+        self.settingsButton.clicked.connect(lambda: self.goSettings())
+    def goSettings(self):
+        self.SettingsWindow = QtWidgets.QMainWindow()
+        ui = Ui_SettingsWindow()
+        ui.setupUi(self.SettingsWindow)
+        self.SettingsWindow.show()
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -150,6 +162,7 @@ class Ui_MainWindow(object):
             for pid in info:
                 if pid.lower() == clItem.text().lower():
                     os.kill(info[pid]["win_csgo_PID"], signal.SIGTERM)
+                    os.kill(info[pid]["win_steam_PID"], signal.SIGTERM)
                     self.LogWrite(f'- {info[pid]["login"]} был выключен.')
             clItem.setBackground(QtGui.QColor(0, 0, 0, 0))
             OnStart()
@@ -165,6 +178,7 @@ class Ui_MainWindow(object):
                                                  password=info[i]["password"],
                                                  shared_secret=info[i]["shared_secret"],
                                                  win_csgo_PID=info[i]["win_csgo_PID"],
+                                                 win_steam_PID=info[i]["win_steam_PID"],
                                                  status=info[i]["status"],
                                                  posX=info[i]["posX"],
                                                  posY=info[i]["posY"]))
