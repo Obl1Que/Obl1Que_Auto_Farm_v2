@@ -6,20 +6,27 @@ import autoit
 from steampy.guard import generate_one_time_code
 
 class SteamAccount():
-    def __init__(self, login, password, shared_secret, win_csgo_PID = None, status = None, posX = None, posY = None):
+    def __init__(self, login, password, shared_secret, win_csgo_PID = None, win_steam_PID = None, status = None, posX = None, posY = None):
         self.login = login
         self.password = password
         self.shared_secret = shared_secret
         self.win_csgo_title = f'[{self.login}] # Counter-Strike: Global Offensive - Direct3D 9'
+
+        self.steam_language = readJson('settings/settings.json')["steam_language"]
+        self.steam_path = readJson('settings/settings.json')["steam_path"]
+
         if win_csgo_PID is not None and \
+                win_steam_PID is not None and \
                 status is not None and \
                 posX is not None and \
                 posY is not None:
+            self.win_steam_PID = win_steam_PID
             self.win_csgo_PID = win_csgo_PID
             self.status = status
             self.posX = posX
             self.posY = posY
         else:
+            self.win_steam_PID = 0
             self.win_csgo_PID = 0
             self.status = 'Off'
             self.posX = 0
@@ -39,12 +46,15 @@ class SteamAccount():
                    f'-nosound '
                    f'-window -w 640 -h 480 '
                    f'+exec autoexec.cfg')
-        autoit.win_wait('Steam Guard — Необходима авторизация компьютера')
-        autoit.win_activate('Steam Guard — Необходима авторизация компьютера')
-        autoit.win_wait_active('Steam Guard — Необходима авторизация компьютера', 5)
+        steam_lang_guard = readJson('settings/steam_lang.json')[self.steam_language]["guard_wait"]
+
+        autoit.win_wait(steam_lang_guard)
+        autoit.win_activate(steam_lang_guard)
+        autoit.win_wait_active(steam_lang_guard, 5)
+        self.win_steam_PID = autoit.win_get_process(steam_lang_guard)
         autoit.send(self.GuardGen())
         autoit.send('{Enter}')
-        autoit.win_wait_close('Steam Guard — Необходима авторизация компьютера')
+        autoit.win_wait_close(steam_lang_guard)
         autoit.win_wait('Counter-Strike: Global Offensive - Direct3D 9')
         autoit.win_activate('Counter-Strike: Global Offensive - Direct3D 9')
         autoit.win_wait_active('Counter-Strike: Global Offensive - Direct3D 9')
@@ -74,6 +84,7 @@ class SteamAccount():
                 'shared_secret': self.shared_secret,
                 'win_csgo_title': self.win_csgo_title,
                 'win_csgo_PID': self.win_csgo_PID,
+                'win_steam_PID': self.win_steam_PID,
                 'status': self.status,
                 'posX': self.posX,
                 'posY': self.posY
@@ -83,14 +94,16 @@ class SteamAccount():
         file.close()
     def CloseAccount(self):
         os.kill(self.win_csgo_PID, signal.SIGTERM)
+        os.kill(self.win_steam_PID, signal.SIGTERM)
         self.win_csgo_PID = 0
+        self.win_steam_PID = 0
         self.status = 'Off'
         self.UpdateAccountsJSON()
     def ConnectToServer(self, ip, password = None):
         autoit.win_activate(self.win_csgo_title)
         autoit.win_wait_active(self.win_csgo_title)
         autoit.send('{`}')
-        time.sleep(0.2)
+        time.sleep(0.3)
         if password:
             autoit.send(f'connect {ip}; password {password}', 1)
         else:
@@ -110,7 +123,7 @@ def GetSharedSecret(login):
 def ParceLogPass():
     accounts = {}
     file = open('logpass.txt')
-    ##! pos menyat
+
     for account in file:
         if account != '\n':
             account_pair = account.split(':')
