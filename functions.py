@@ -34,40 +34,48 @@ class SteamAccount():
     def GuardGen(self):
         return generate_one_time_code(self.shared_secret)
     def CSGOLaunch(self):
-        self.status = 'Starting'
-        autoit.run(f'C:\Program Files (x86)\Steam\steam.exe '
-                   f'-noreactlogin '
-                   f'-login {self.login} {self.password} '
-                   f'-applaunch 730 '
-                   f'-low '
-                   f'-nohltv '
-                   f'-no-browser '
-                   f'-novid '
-                   f'-nosound '
-                   f'-window -w 640 -h 480 '
-                   f'+exec autoexec.cfg')
-        steam_lang_guard = readJson('settings/steam_lang.json')[self.steam_language]["guard_wait"]
+        try:
+            self.status = 'Starting'
+            autoit.run(f'{readJson("settings/settings.json")["steam_path"]} '
+                       f'-noreactlogin '
+                       f'-login {self.login} {self.password} '
+                       f'-applaunch 730 '
+                       f'-low '
+                       f'-nohltv '
+                       f'-no-browser '
+                       f'-novid '
+                       f'-nosound '
+                       f'-window -w 640 -h 480 '
+                       f'+exec autoexec.cfg')
+            steam_lang_guard = readJson('settings/steam_lang.json')[self.steam_language]["guard_wait"]
 
-        autoit.win_wait(steam_lang_guard)
-        autoit.win_activate(steam_lang_guard)
-        autoit.win_wait_active(steam_lang_guard, 5)
-        self.win_steam_PID = autoit.win_get_process(steam_lang_guard)
-        autoit.send(self.GuardGen())
-        autoit.send('{Enter}')
-        autoit.win_wait_close(steam_lang_guard)
-        autoit.win_wait('Counter-Strike: Global Offensive - Direct3D 9')
-        autoit.win_activate('Counter-Strike: Global Offensive - Direct3D 9')
-        autoit.win_wait_active('Counter-Strike: Global Offensive - Direct3D 9')
-
-        while autoit.win_exists(self.win_csgo_title) == 0:
+            autoit.win_wait(steam_lang_guard)
+            autoit.win_activate(steam_lang_guard)
+            autoit.win_wait_active(steam_lang_guard, 5)
+            self.win_steam_PID = autoit.win_get_process(steam_lang_guard)
+            autoit.send(self.GuardGen())
+            autoit.send('{Enter}')
+            autoit.win_wait_close(steam_lang_guard)
+            autoit.win_wait('Counter-Strike: Global Offensive - Direct3D 9')
             autoit.win_activate('Counter-Strike: Global Offensive - Direct3D 9')
             autoit.win_wait_active('Counter-Strike: Global Offensive - Direct3D 9')
-            autoit.win_set_title('Counter-Strike: Global Offensive - Direct3D 9', self.win_csgo_title)
 
-        self.MoveWindow(0, 0)
-        self.win_csgo_PID = autoit.win_get_process(self.win_csgo_title)
-        self.status = 'Launched'
-        self.UpdateAccountsJSON()
+            while autoit.win_exists(self.win_csgo_title) == 0:
+                autoit.win_activate('Counter-Strike: Global Offensive - Direct3D 9')
+                autoit.win_wait_active('Counter-Strike: Global Offensive - Direct3D 9')
+                autoit.win_set_title('Counter-Strike: Global Offensive - Direct3D 9', self.win_csgo_title)
+
+            self.MoveWindow(0, 0)
+            self.win_csgo_PID = autoit.win_get_process(self.win_csgo_title)
+            self.status = 'Launched'
+            self.UpdateAccountsJSON()
+            # time.sleep(10)
+            # self.ConnectToServer('login', 'password')
+            # self.status = 'Connected'
+            # self.UpdateAccountsJSON()
+        except Exception as ex:
+            if str(ex) == 'run program failed':
+                print('\nНе правильно указан путь до папки Steam!\nИзмените в настройках.\n')
     def MoveWindow(self, posX, posY):
         autoit.win_move(self.win_csgo_title, posX, posY)
         self.posX = posX
@@ -103,11 +111,12 @@ class SteamAccount():
         autoit.win_activate(self.win_csgo_title)
         autoit.win_wait_active(self.win_csgo_title)
         autoit.send('{`}')
-        time.sleep(0.3)
+        time.sleep(0.4)
         if password:
             autoit.send(f'connect {ip}; password {password}', 1)
         else:
             autoit.send(f'connect {ip}', 1)
+        time.sleep(0.1)
         autoit.send('{Enter}')
 
 def GetSharedSecret(login):

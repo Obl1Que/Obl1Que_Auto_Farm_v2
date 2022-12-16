@@ -102,11 +102,12 @@ class Ui_SettingsWindow(object):
 
         self.goMainF()
         self.ChangeLangF()
+        self.ChangePath()
 
     def retranslateUi(self, SettingsWindow):
         _translate = QtCore.QCoreApplication.translate
         SettingsWindow.setWindowTitle(_translate("SettingsWindow", "Obl1Que\'s Panel CS:GO"))
-        self.gomainwin.setText(_translate("SettingsWindow", "ЗАКРЫТЬ ОКНО НАСТРОЕК"))
+        self.gomainwin.setText(_translate("SettingsWindow", "СОХРАНИТЬ НАСТРОЙКИ И ВЫЙТИ"))
         self.labelPathToSteam.setText(_translate("SettingsWindow", "ПУТЬ ДО STEAM:"))
         self.langSteamRU.setText(_translate("SettingsWindow", "РУССКИЙ"))
         self.langSteamEN.setText(_translate("SettingsWindow", "ENGLISH"))
@@ -117,6 +118,11 @@ class Ui_SettingsWindow(object):
     def goMainF(self):
         self.gomainwin.clicked.connect(lambda: self.goMain())
     def goMain(self):
+        info = readJson("settings/settings.json")
+        info["steam_path"] = self.linePathToSteam.text()
+        file = open("settings/settings.json", "w", encoding="utf-8")
+        file.write(json.dumps(info, indent=4, ensure_ascii=False))
+        file.close()
         self.SettingsWindow.close()
 
     def ChangeLangF(self):
@@ -129,3 +135,5 @@ class Ui_SettingsWindow(object):
         file.write(json.dumps(info, indent=4, ensure_ascii=False))
         file.close()
         print(f'Язык изменён на {butText}')
+    def ChangePath(self):
+        self.linePathToSteam.setText(readJson("settings/settings.json")["steam_path"])

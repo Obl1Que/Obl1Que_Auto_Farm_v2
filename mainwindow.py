@@ -81,6 +81,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.checkAccounts()
         self.addAccountsF()
         self.addMaFilesF()
         self.checkAccountsF()
@@ -213,7 +214,9 @@ class Ui_MainWindow(object):
         self.itemsToLaunch.clear()
         for account in self.steamAccounts:
             account.CSGOLaunch()
+            self.checkAccounts()
             for i in range(self.accountsList.count()):
                 if account.login == self.accountsList.item(i).text():
                     self.accountsList.item(i).setBackground(QtGui.QColor(166, 255, 167, 255))
-            self.logList.addItem(f'+ {account.login} - запущен!')
+                    self.logList.addItem(f'+ {account.login} - запущен!')
+        self.checkAccounts()
